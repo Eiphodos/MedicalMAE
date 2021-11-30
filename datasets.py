@@ -32,8 +32,9 @@ class DataAugmentationForMAE(object):
             std = (0.25)
 
         self.transform = transforms.Compose([
+            transforms.RandomResizedCrop(args.image_size),
             transforms.ColorJitter(0.1, 0.1, 0.1),
-            transforms.RandomHorizontalFlip(p=0.5),
+            transforms.RandomHorizontalFlip(p=0.25),
             transforms.ToTensor(),
             transforms.Normalize(
                 mean=torch.tensor(mean),
