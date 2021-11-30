@@ -29,7 +29,7 @@ def get_args():
                         help='Name of model to train')
     parser.add_argument('--mask_ratio', default=0.75, type=int,
                         help='Ratio of the total number of patches to be masked')
-    parser.add_argument('--input_size', default=224, type=int,
+    parser.add_argument('--image_size', default=224, type=int,
                         help='images input size for backbone')
     parser.add_argument('--patch_size', default=16, type=int,
                         help='Patch size for backbone patch embedding')
