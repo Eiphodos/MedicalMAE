@@ -36,15 +36,17 @@ def get_args():
     parser.add_argument('--num_channels', default=1, type=int,
                         help='Number of channels for each input')
     parser.add_argument('--encoder_dim', default=1024, type=int,
-                        help='Number of channels for each input')
+                        help='Token dimension for the transformer encoder')
     parser.add_argument('--encoder_depth', default=6, type=int,
-                        help='Number of channels for each input')
+                        help='Depth of the transformer encoder')
     parser.add_argument('--encoder_heads', default=8, type=int,
-                        help='Number of channels for each input')
+                        help='Number of heads for the transformer encoder')
     parser.add_argument('--decoder_dim', default=512, type=int,
-                        help='Number of channels for each input')
+                        help='Token dimension for the transformer decoder')
     parser.add_argument('--decoder_depth', default=6, type=int,
-                        help='Number of channels for each input')
+                        help='Depth of the transformer decoder')
+    parser.add_argument('--decoder_heads', default=6, type=int,
+                        help='Number of heads for the transformer decoder')
 
     # Optimizer parameters
     parser.add_argument('--opt', default='adamw', type=str, metavar='OPTIMIZER',
@@ -128,6 +130,7 @@ def get_model(args):
         dim=args.encoder_dim,
         depth=args.encoder_depth,
         heads=args.encoder_heads,
+        channels=args.num_channels,
         mlp_dim=2048 # Does not matter, unused
     )
 
@@ -135,7 +138,8 @@ def get_model(args):
         encoder=enc,
         masking_ratio=args.mask_ratio,
         decoder_dim=args.decoder_dim,
-        decoder_depth=args.decoder_depth
+        decoder_depth=args.decoder_depth,
+        decoder_heads=args.decoder_heads
     )
 
     return mae
