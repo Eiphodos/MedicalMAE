@@ -7,7 +7,7 @@ import os
 
 from pathlib import Path
 
-from vit_pytorch import ViT, MAE
+from vit_pytorch import ViT
 import torch
 import torch.backends.cudnn as cudnn
 
@@ -16,7 +16,7 @@ from utils import NativeScalerWithGradNormCount as NativeScaler
 from datasets import build_mae_pretraining_dataset
 from optim_factory import create_optimizer
 from engine_pretraining import train_one_epoch
-
+from modeling_pretraining import MAE
 
 def get_args():
     parser = argparse.ArgumentParser('MAE pre-training script', add_help=False)
