@@ -59,7 +59,7 @@ def build_mae_pretraining_dataset(args):
         root = os.path.join(args.data_path, 'train')
         img_folder = os.getenv('TMPDIR')
         extract_dataset_to_local(root, img_folder)
-        return datasets.folder.ImageFolder(img_folder, loader=deeplesion_loader, transform=transform, extensions=('.png'))
+        return datasets.folder.ImageFolder(img_folder, loader=deeplesion_loader, transform=transform)
     else:
         return datasets.folder.ImageFolder(args.data_path, transform=transform)
 
