@@ -11,15 +11,16 @@
 # --------------------------------------------------------'
 import os
 import torch
+import torch.distributed as dist
 
 import numpy as np
 import multiprocessing as mp
 from itertools import repeat
 from datetime import datetime
 from PIL import Image
-
 from torchvision import datasets, transforms
 
+import utils
 
 
 class DataAugmentationForMAE(object):
@@ -58,7 +59,10 @@ def build_mae_pretraining_dataset(args):
     if args.data_set == 'DeepLesion':
         root = os.path.join(args.data_path, 'train')
         img_folder = os.getenv('TMPDIR')
-        extract_dataset_to_local(root, img_folder)
+        if utils.is_main_process():
+            extract_dataset_to_local(root, img_folder)
+        if args.distributed:
+            dist.barrier()
         return datasets.folder.ImageFolder(img_folder, loader=deeplesion_loader, transform=transform)
     else:
         return datasets.folder.ImageFolder(args.data_path, transform=transform)
