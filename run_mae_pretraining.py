@@ -37,13 +37,13 @@ def get_args():
                         help='Number of channels for each input')
     parser.add_argument('--encoder_dim', default=1024, type=int,
                         help='Token dimension for the transformer encoder')
-    parser.add_argument('--encoder_depth', default=6, type=int,
+    parser.add_argument('--encoder_depth', default=12, type=int,
                         help='Depth of the transformer encoder')
-    parser.add_argument('--encoder_heads', default=8, type=int,
+    parser.add_argument('--encoder_heads', default=12, type=int,
                         help='Number of heads for the transformer encoder')
     parser.add_argument('--decoder_dim', default=512, type=int,
                         help='Token dimension for the transformer decoder')
-    parser.add_argument('--decoder_depth', default=6, type=int,
+    parser.add_argument('--decoder_depth', default=8, type=int,
                         help='Depth of the transformer decoder')
     parser.add_argument('--decoder_heads', default=6, type=int,
                         help='Number of heads for the transformer decoder')
@@ -65,7 +65,7 @@ def get_args():
         weight decay. We use a cosine schedule for WD. 
         (Set the same value with args.weight_decay to keep weight decay no change)""")
 
-    parser.add_argument('--lr', type=float, default=5e-4, metavar='LR',
+    parser.add_argument('--lr', type=float, default=1.5e-4, metavar='LR',
                         help='learning rate (default: 5e-4)')
     parser.add_argument('--warmup_lr', type=float, default=1e-6, metavar='LR',
                         help='warmup learning rate (default: 1e-6)')
