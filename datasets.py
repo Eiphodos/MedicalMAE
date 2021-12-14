@@ -13,6 +13,8 @@ import os
 import torch
 import torch.distributed as dist
 
+from timm.data.constants import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
+
 import numpy as np
 import multiprocessing as mp
 from itertools import repeat
@@ -21,6 +23,7 @@ from PIL import Image
 from torchvision import datasets, transforms
 
 import utils
+from mae_transforms import ClipCTIntensity
 
 
 class DataAugmentationForMAE(object):
@@ -28,17 +31,29 @@ class DataAugmentationForMAE(object):
         if args.data_set == 'DeepLesion':
             mean = (0.5)
             std = (0.25)
+        elif args.data_set == 'ImageNet':
+            mean = IMAGENET_DEFAULT_MEAN
+            std = IMAGENET_DEFAULT_STD
         else:
-            mean = (0)
-            std = (0.25)
-
-        self.transform = transforms.Compose([
-            transforms.RandomResizedCrop(args.image_size),
-            transforms.ToTensor(),
-            transforms.Normalize(
-                mean=torch.tensor(mean),
-                std=torch.tensor(std))
-        ])
+            mean = 0
+            std = 0.25
+        if args.clip_ct_intensity:
+            self.transform = transforms.Compose([
+                ClipCTIntensity(args.ct_intensity_min, args.ct_intensity_max),
+                transforms.RandomResizedCrop(args.image_size),
+                transforms.ToTensor(),
+                transforms.Normalize(
+                    mean=torch.tensor(mean),
+                    std=torch.tensor(std))
+            ])
+        else:
+            self.transform = transforms.Compose([
+                transforms.RandomResizedCrop(args.image_size),
+                transforms.ToTensor(),
+                transforms.Normalize(
+                    mean=torch.tensor(mean),
+                    std=torch.tensor(std))
+            ])
 
     def __call__(self, image):
         transformed_image = self.transform(image)
@@ -62,6 +77,14 @@ def build_mae_pretraining_dataset(args):
         if args.distributed:
             dist.barrier()
         return datasets.folder.ImageFolder(img_folder, loader=deeplesion_loader, transform=transform)
+    elif args.data_set == 'ImageNet':
+        root = args.data_path
+        img_folder = os.getenv('TMPDIR')
+        if utils.is_main_process():
+            extract_dataset_to_local(root, img_folder)
+        if args.distributed:
+            dist.barrier()
+        return datasets.folder.ImageFolder(img_folder, transform=transform)
     else:
         return datasets.folder.ImageFolder(args.data_path, transform=transform)
 
@@ -69,7 +92,8 @@ def build_mae_pretraining_dataset(args):
 def deeplesion_loader(path):
     with open(path, 'rb') as f:
         img = Image.open(f)
-        nimg = np.array(img).astype(np.uint8)
+        nimg = np.array(img)
+        nimg = nimg.astype(np.uint8)
         img = Image.fromarray(nimg)
         return img.convert('L')
 

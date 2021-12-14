@@ -78,18 +78,22 @@ def get_args():
                         help='epochs to warmup LR, if scheduler supports')
 
     # Augmentation parameters
-    parser.add_argument('--color_jitter', type=float, default=0.4, metavar='PCT',
-                        help='Color jitter factor (default: 0.4)')
     parser.add_argument('--train_interpolation', type=str, default='bicubic',
                         help='Training interpolation (random, bilinear, bicubic default: "bicubic")')
+
+    # Preprocessing
+    parser.add_argument('--clip_ct_intensity', default=False, action='store_true',
+                        help='If input images should be clipped to a set intensity')
+    parser.add_argument('--ct_intensity_min', default=-1000, type=int,
+                        help='Minimum CT intensity')
+    parser.add_argument('--ct_intensity_max', default=1000, type=int,
+                        help='Maximum CT intensity')
 
     # Dataset parameters
     parser.add_argument('--data_set', default='DeepLesion', type=str,
                         help='Name of the dataset')
     parser.add_argument('--data_path', default='/datasets01/imagenet_full_size/061417/', type=str,
                         help='dataset path')
-    parser.add_argument('--data_tmp_path', default=False, action='store_true',
-                        help='If data should be stored at a temporary path')
 
     parser.add_argument('--output_dir', default='',
                         help='path where to save, empty for no saving')
