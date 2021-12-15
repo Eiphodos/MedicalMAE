@@ -35,6 +35,61 @@ class MAE(nn.Module):
         self.decoder_pos_emb = nn.Embedding(num_patches, decoder_dim)
         self.to_pixels = nn.Linear(decoder_dim, pixel_values_per_patch)
 
+    def forward_with_output(self, img):
+        device = img.device
+
+        # get patches
+
+        patches = self.to_patch(img)
+        batch, num_patches, *_ = patches.shape
+
+        # patch to encoder tokens and add positions
+
+        tokens = self.patch_to_emb(patches)
+        tokens = tokens + self.encoder.pos_embedding[:, 1:(num_patches + 1)]
+
+        # calculate of patches needed to be masked, and get random indices, dividing it up for mask vs unmasked
+
+        num_masked = int(self.masking_ratio * num_patches)
+        rand_indices = torch.rand(batch, num_patches, device = device).argsort(dim = -1)
+        masked_indices, unmasked_indices = rand_indices[:, :num_masked], rand_indices[:, num_masked:]
+
+        # get the unmasked tokens to be encoded
+
+        batch_range = torch.arange(batch, device = device)[:, None]
+        tokens = tokens[batch_range, unmasked_indices]
+
+        # get the patches to be masked for the final reconstruction loss
+
+        masked_patches = patches[batch_range, masked_indices]
+
+        # attend with vision transformer
+
+        encoded_tokens = self.encoder.transformer(tokens)
+
+        # project encoder to decoder dimensions, if they are not equal - the paper says you can get away with a smaller dimension for decoder
+
+        decoder_tokens = self.enc_to_dec(encoded_tokens)
+
+        # repeat mask tokens for number of masked, and add the positions using the masked indices derived above
+
+        mask_tokens = repeat(self.mask_token, 'd -> b n d', b = batch, n = num_masked)
+        mask_tokens = mask_tokens + self.decoder_pos_emb(masked_indices)
+
+        # concat the masked tokens to the decoder tokens and attend with decoder
+
+        decoder_tokens = torch.cat((mask_tokens, decoder_tokens), dim = 1)
+        decoded_tokens = self.decoder(decoder_tokens)
+
+        # splice out the mask tokens and project to pixel values
+
+        mask_tokens = decoded_tokens[:, :num_masked]
+        pred_pixel_values = self.to_pixels(mask_tokens)
+
+        return patches, unmasked_indices, masked_indices, batch_range, masked_patches, pred_pixel_values
+
+
+
     def forward(self, img):
         device = img.device
 
