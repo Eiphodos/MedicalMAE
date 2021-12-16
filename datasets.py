@@ -70,10 +70,9 @@ def build_mae_pretraining_dataset(args):
     transform = DataAugmentationForMAE(args)
     print("Data Aug = %s" % str(transform))
     if args.data_set == 'DeepLesion':
-        root = os.path.join(args.data_path, 'train')
         img_folder = os.getenv('TMPDIR')
         if utils.is_main_process():
-            extract_dataset_to_local(root, img_folder)
+            extract_dataset_to_local(args.data_path, img_folder)
         if args.distributed:
             dist.barrier()
         return datasets.folder.ImageFolder(img_folder, loader=deeplesion_loader, transform=transform)
