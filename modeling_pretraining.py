@@ -5,6 +5,7 @@ from einops import repeat
 
 from vit_pytorch.vit import Transformer
 
+
 class MAE(nn.Module):
     def __init__(
         self,

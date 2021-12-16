@@ -10,7 +10,7 @@ class ClipCTIntensity(object):
     def __call__(self, img):
         npimg = np.array(img).astype(np.int32)
         # Convert from 16-bit image not already done.
-        if np.min(npimg) >= 32768:
+        if np.min(npimg) > 255:
             npimg = npimg - 32768
         windowed_npimg = np.minimum(255, np.maximum(0, (npimg-self.ct_min)/(self.ct_max-self.ct_min)*255))
         windowed_npimg = windowed_npimg.astype(np.uint8)

@@ -29,14 +29,14 @@ from mae_transforms import ClipCTIntensity
 class DataAugmentationForMAE(object):
     def __init__(self, args):
         if args.data_set == 'DeepLesion':
-            mean = (0.5)
-            std = (0.25)
+            mean = (0)
+            std = (1)
         elif args.data_set == 'ImageNet':
             mean = IMAGENET_DEFAULT_MEAN
             std = IMAGENET_DEFAULT_STD
         else:
-            mean = 0
-            std = 0.25
+            mean = 0.5
+            std = 0.5
         if args.clip_ct_intensity:
             self.transform = transforms.Compose([
                 ClipCTIntensity(args.ct_intensity_min, args.ct_intensity_max),
